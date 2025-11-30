@@ -1,0 +1,5 @@
+{
+  "name": "Banana2 灵感画室",
+  "description": "基于 Gemini 3 Pro (Banana2) 的现代化绘图工具，支持中文提示词，内置灵感画廊，多种画幅比例可选。",
+  "requestFramePermissions": []
+}
