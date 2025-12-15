@@ -21,9 +21,11 @@
 ```bash
 cd worker
 npm install
+
 GEMINI_API_KEY=你的Key MODEL_BASE_URL=https://0rzz.ggff.net/v1beta/models npm run dev
 ```
 > `MODEL_BASE_URL` 和 `MODEL_NAME` 可选，默认使用 `gemini-3-pro-image-preview` 与 `https://0rzz.ggff.net/v1beta/models`（Gemini 官方风格接口）。
+
 
 ### 2. 启动前端
 ```bash
@@ -37,6 +39,7 @@ VITE_WORKER_URL=http://localhost:8787 npm run dev
 ## 部署到 Cloudflare
 
 ### 部署 Worker
+
 1. 将 Worker 作为 **独立的 Worker 服务** 部署（不要选择 “静态资产” 类型，否则无法添加变量）：
 ```bash
 cd worker
@@ -48,6 +51,7 @@ wrangler deploy --name banana2-worker [--var MODEL_BASE_URL=https://0rzz.ggff.ne
 wrangler secret put GEMINI_API_KEY --name banana2-worker
 ```
 3. 记下部署得到的 Worker 域名（如 `https://banana2-worker.your-subdomain.workers.dev`）。
+
 
 ### 部署前端到 Pages
 1. 在 Cloudflare Pages 里创建站点，构建命令 `npm run build`，输出目录 `dist`。

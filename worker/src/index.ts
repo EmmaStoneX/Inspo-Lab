@@ -4,7 +4,9 @@ export interface Env {
   MODEL_NAME?: string;
 }
 
+
 const DEFAULT_BASE_URL = 'https://0rzz.ggff.net/v1beta/models';
+
 const DEFAULT_MODEL = 'gemini-3-pro-image-preview';
 const API_PATH = '/api/generate';
 
@@ -80,6 +82,7 @@ export default {
     const model = env.MODEL_NAME || DEFAULT_MODEL;
 
     const payload = {
+
       contents: [
         {
           role: 'user',
@@ -115,9 +118,11 @@ export default {
       }
 
       const data = await upstream.json();
+
       const content =
         data?.candidates?.[0]?.content?.parts?.map((part: any) => part?.text || '')
           .join('') || '';
+
       if (!content) {
         return buildError('模型未返回内容', 500);
       }
