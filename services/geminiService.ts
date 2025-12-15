@@ -7,7 +7,13 @@ const getApiKey = (): string => {
       return localKey;
     }
   }
-  return process.env.API_KEY || '';
+
+  // 环境变量优先，兼容 Vite 的构建注入
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    return import.meta.env.VITE_API_KEY || '';
+  }
+
+  return '';
 };
 
 /**
