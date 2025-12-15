@@ -102,19 +102,36 @@ export default {
         body: JSON.stringify(payload),
       });
 
+      const upstreamContentType = upstream.headers.get('content-type') || '';
+      const upstreamText = await upstream.text();
+
       if (!upstream.ok) {
-        const errorText = await upstream.text();
         let message = `上游返回 ${upstream.status}`;
         try {
-          const json = JSON.parse(errorText);
-          message = json.error?.message || json.message || message;
+          const json = upstreamText ? JSON.parse(upstreamText) : null;
+          message = json?.error?.message || json?.message || message;
         } catch (error) {
-          message = `${message}: ${errorText.slice(0, 200)}`;
+          message = `${message}: ${upstreamText.slice(0, 200)}`;
         }
         return buildError(message, upstream.status);
       }
 
-      const data = await upstream.json();
+      if (!upstreamText) {
+        return buildError('模型未返回内容', 500);
+      }
+
+      let data: any = null;
+      try {
+        if (upstreamContentType.includes('application/json')) {
+          data = JSON.parse(upstreamText);
+        } else {
+          // 部分网关可能返回 text/plain，这里尝试兼容
+          data = JSON.parse(upstreamText.replace(/(^```json\n?|```$)/g, ''));
+        }
+      } catch (error) {
+        return buildError('上游返回的内容无法解析为 JSON', 500);
+      }
+
       const content =
         data?.candidates?.[0]?.content?.parts?.map((part: any) => part?.text || '')
           .join('') || '';
