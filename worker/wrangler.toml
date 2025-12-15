@@ -2,6 +2,11 @@ name = "banana2-worker"
 main = "src/index.ts"
 compatibility_date = "2024-09-02"
 
+# 如需绑定自定义域名，请将下方 routes 解除注释并填入自己的域名/zone_id
+# routes = [
+#   { pattern = "api.example.com/*", zone_id = "" }
+# ]
+
 [vars]
 # 覆盖默认模型或中转站地址（可选）
 # MODEL_NAME = "gemini-3-pro-image-preview"

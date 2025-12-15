@@ -10,6 +10,7 @@
 - **前端**：Vite + React 静态站点，托管在 **Cloudflare Pages**。
 - **后端**：Cloudflare **Worker** 提供 `/api/generate` 接口，封装对 Gemini 3 Pro（或 OpenAI 兼容代理）的调用。
 - **安全性**：浏览器只访问 Worker，所有敏感密钥都在服务端环境变量中读取。
+- **Worker 地址校验**：前端会校验 `VITE_WORKER_URL`，确保是可访问的 Worker 域名（生产必须是 `https://`），避免由于误填 Pages 域名或附带 `/api/generate` 导致 404。
 
 ## 本地运行
 
@@ -60,3 +61,7 @@ wrangler secret put GEMINI_API_KEY --name banana2-worker
 ## 提示
 - 如果你有自己的 OpenAI 兼容代理，可以通过 `MODEL_BASE_URL`、`MODEL_NAME` 两个环境变量切换。
 - Worker 已内置 CORS 处理，便于从 Pages 或本地开发环境直接调用。
+
+## 常见问题
+- **404 / Unexpected end of JSON input**：请确认 `VITE_WORKER_URL` 填写的是 Worker 域名（`https://xxx.workers.dev` 或绑定的自定义域名），且不要包含 `/api/generate` 路径。
+- **无法添加变量**：Worker 必须作为独立 Worker 服务创建，不能选择 “静态资产” 类型，否则无法添加环境变量。

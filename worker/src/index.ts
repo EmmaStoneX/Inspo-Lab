@@ -8,6 +8,24 @@ const DEFAULT_BASE_URL = 'https://0rzz.ggff.net/v1beta/models';
 const DEFAULT_MODEL = 'gemini-3-pro-image-preview';
 const API_PATH = '/api/generate';
 
+const normalizeBaseUrl = (raw?: string): string => {
+  const value = (raw || DEFAULT_BASE_URL).trim();
+  let parsed: URL;
+
+  try {
+    parsed = new URL(value);
+  } catch (error) {
+    throw new Error('MODEL_BASE_URL 不是合法的 URL');
+  }
+
+  if (!['https:', 'http:'].includes(parsed.protocol)) {
+    throw new Error('MODEL_BASE_URL 仅支持 http/https 协议');
+  }
+
+  const sanitizedPath = parsed.pathname.replace(/\/$/, '');
+  return `${parsed.origin}${sanitizedPath}`;
+};
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST,OPTIONS',
@@ -76,8 +94,14 @@ export default {
       return buildError('请提供有效的 prompt 字段', 400);
     }
 
-    const baseUrl = (env.MODEL_BASE_URL || DEFAULT_BASE_URL).replace(/\/$/, '');
-    const model = env.MODEL_NAME || DEFAULT_MODEL;
+    let baseUrl: string;
+    try {
+      baseUrl = normalizeBaseUrl(env.MODEL_BASE_URL);
+    } catch (error: any) {
+      return buildError(`Server misconfigured: ${error.message}`, 500);
+    }
+
+    const model = (env.MODEL_NAME || DEFAULT_MODEL).trim();
 
     const payload = {
       contents: [
@@ -103,7 +127,7 @@ export default {
       });
 
       const upstreamContentType = upstream.headers.get('content-type') || '';
-      const upstreamText = await upstream.text();
+      const upstreamText = (await upstream.text()) || '';
 
       if (!upstream.ok) {
         let message = `上游返回 ${upstream.status}`;
@@ -116,17 +140,18 @@ export default {
         return buildError(message, upstream.status);
       }
 
-      if (!upstreamText) {
-        return buildError('模型未返回内容', 500);
+      const upstreamBody = upstreamText.trim();
+      if (!upstreamBody) {
+        return buildError('模型未返回内容', 502);
       }
 
       let data: any = null;
       try {
         if (upstreamContentType.includes('application/json')) {
-          data = JSON.parse(upstreamText);
+          data = JSON.parse(upstreamBody);
         } else {
           // 部分网关可能返回 text/plain，这里尝试兼容
-          data = JSON.parse(upstreamText.replace(/(^```json\n?|```$)/g, ''));
+          data = JSON.parse(upstreamBody.replace(/(^```json\n?|```$)/g, ''));
         }
       } catch (error) {
         return buildError('上游返回的内容无法解析为 JSON', 500);
