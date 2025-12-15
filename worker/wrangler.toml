@@ -5,4 +5,5 @@ compatibility_date = "2024-09-02"
 [vars]
 # 覆盖默认模型或中转站地址（可选）
 # MODEL_NAME = "gemini-3-pro-image-preview"
-# MODEL_BASE_URL = "https://kickoff.netlib.re"
+# MODEL_BASE_URL = "https://0rzz.ggff.net/v1beta/models"
+

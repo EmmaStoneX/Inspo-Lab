@@ -4,7 +4,9 @@ export interface Env {
   MODEL_NAME?: string;
 }
 
-const DEFAULT_BASE_URL = 'https://kickoff.netlib.re';
+
+const DEFAULT_BASE_URL = 'https://0rzz.ggff.net/v1beta/models';
+
 const DEFAULT_MODEL = 'gemini-3-pro-image-preview';
 const API_PATH = '/api/generate';
 
@@ -80,22 +82,24 @@ export default {
     const model = env.MODEL_NAME || DEFAULT_MODEL;
 
     const payload = {
-      model,
-      messages: [
+
+      contents: [
         {
           role: 'user',
-          content: prompt,
+          parts: [{ text: prompt }],
         },
       ],
-      stream: false,
+      generationConfig: {
+        // 请求纯文本（通常包含 markdown 图片链接），便于解析
+        responseMimeType: 'text/plain',
+      },
     };
 
     try {
-      const upstream = await fetch(`${baseUrl}/v1/chat/completions`, {
+      const upstream = await fetch(`${baseUrl}/${model}:generateContent`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${env.GEMINI_API_KEY}`,
           'x-goog-api-key': env.GEMINI_API_KEY,
         },
         body: JSON.stringify(payload),
@@ -114,7 +118,11 @@ export default {
       }
 
       const data = await upstream.json();
-      const content = data?.choices?.[0]?.message?.content as string | undefined;
+
+      const content =
+        data?.candidates?.[0]?.content?.parts?.map((part: any) => part?.text || '')
+          .join('') || '';
+
       if (!content) {
         return buildError('模型未返回内容', 500);
       }
