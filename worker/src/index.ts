@@ -117,11 +117,16 @@ export default {
         return buildError(message, upstream.status);
       }
 
-      const data = await upstream.json();
-
-      const content =
-        data?.candidates?.[0]?.content?.parts?.map((part: any) => part?.text || '')
-          .join('') || '';
+      const data = await upstream.json() as {
+        candidates?: Array<{
+          content?: {
+            parts?: Array<{
+              text?: string;
+            }>;
+          };
+        }>;
+      };
+      const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!content) {
         return buildError('模型未返回内容', 500);

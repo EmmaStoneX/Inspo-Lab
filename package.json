@@ -4,14 +4,20 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "type-check": "tsc --noEmit",
+    "build": "npm run type-check && vite build",
+    "preview": "vite preview",
+    "build:functions": "cd functions && tsc --noEmit",
+    "preview:deploy": "wrangler pages dev dist --compatibility-date=2023-12-16",
+    "deploy": "wrangler pages deploy dist --project-name=inspo-lab"
   },
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251216.0",
+    "@types/node": "^25.0.2",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.0.0",
