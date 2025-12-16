@@ -1,4 +1,10 @@
-import { Env } from '../../../worker/src/index';
+/// <reference types="@cloudflare/workers-types" />
+
+interface Env {
+  GEMINI_API_KEY: string;
+  MODEL_BASE_URL?: string;
+  MODEL_NAME?: string;
+}
 
 const DEFAULT_BASE_URL = 'https://0rzz.ggff.net/v1beta/models';
 const DEFAULT_MODEL = 'gemini-3-pro-image-preview';
@@ -88,7 +94,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       return buildError('Failed to generate content', response.status);
     }
 
-    const data = await response.json();
+    const data = await response.json() as any; // 临时使用 any 类型，实际应该定义完整的响应类型
     const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
     
     if (!content) {
