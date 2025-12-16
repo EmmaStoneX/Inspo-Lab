@@ -2,16 +2,22 @@
 [build]
   command = "npm run build"
   publish = "dist"
-
-# 禁用 Netlify 的函数部署
-[functions]
-  external_node_modules = ["@cloudflare/workers-types"]
-  node_bundler = "esbuild"
-  # 设置为空目录，防止 Netlify 尝试部署函数
-  directory = ""
+  functions = "functions"
 
 # 重定向规则，确保 SPA 路由正常工作
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+# 构建环境变量
+[build.environment]
+  NODE_VERSION = "18.x"
+  NPM_FLAGS = "--prefer-offline"
+
+# 构建钩子
+[build.hooks]
+  # 构建前安装依赖
+  preBuild = "npm ci"
+  # 构建后清理
+  postBuild = ""

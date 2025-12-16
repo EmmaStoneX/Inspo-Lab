@@ -1,4 +1,4 @@
-name: Deploy to Cloudflare
+name: Deploy to Cloudflare Pages
 
 on:
   push:
@@ -33,7 +33,7 @@ jobs:
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL || '' }}
 
-      - name: Publish to Cloudflare Pages
+      - name: Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -41,33 +41,16 @@ jobs:
           projectName: inspo-lab
           directory: dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          wranglerVersion: '3'
           environment: production
           buildCommand: npm run build
           buildOutputDirectory: dist
           
-  deploy-worker:
-    needs: deploy
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18.x'
-          cache: 'npm'
-          
-      - name: Install Wrangler
-        run: npm install -g wrangler@3
-        
-      - name: Deploy Worker
+      - name: Deploy Functions
+        if: success()
         run: |
-          cd worker
+          cd functions
           npm ci
-          wrangler deploy --minify --compatibility-date $(date +%Y-%m-%d)
+          npm run build
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
