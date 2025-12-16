@@ -1,11 +1,16 @@
+# Cloudflare Pages 配置
 [build]
   command = "npm run build"
   publish = "dist"
 
+# 禁用 Netlify 的函数部署
 [functions]
-  node_bundler = "esbuild"
   external_node_modules = ["@cloudflare/workers-types"]
+  node_bundler = "esbuild"
+  # 设置为空目录，防止 Netlify 尝试部署函数
+  directory = ""
 
+# 重定向规则，确保 SPA 路由正常工作
 [[redirects]]
   from = "/*"
   to = "/index.html"
